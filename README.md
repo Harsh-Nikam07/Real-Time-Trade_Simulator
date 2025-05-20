@@ -1,4 +1,5 @@
 # GoQuant Trade Simulator — Full Stack Project
+![image](https://github.com/user-attachments/assets/1ebf3a23-5d38-4411-8308-a76080e152be)
 
 This repository contains a full-stack real-time cryptocurrency trade simulator developed as part of the GoQuant recruitment assignment.
 

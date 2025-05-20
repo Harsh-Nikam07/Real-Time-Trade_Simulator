@@ -1,0 +1,2 @@
+cammand to start Virtual env - goquant-env\Scripts\activate
+command to start sever - uvicorn main:app --reload

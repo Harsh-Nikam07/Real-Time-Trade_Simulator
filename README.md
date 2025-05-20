@@ -1,4 +1,4 @@
-# GoQuant Trade Simulator — Full Stack Project
+# GoQuant Trade Simulator
 ![goquant](https://github.com/user-attachments/assets/4c113c70-d446-4eb0-a027-b20ec0d61112)
 
 

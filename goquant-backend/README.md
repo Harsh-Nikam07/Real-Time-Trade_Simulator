@@ -1,96 +1,116 @@
-# GoQuant Trade Simulator — Full Stack Project
+# GoQuant Trade Simulator — Backend
 
-This repository contains a full-stack real-time cryptocurrency trade simulator developed as part of the GoQuant recruitment assignment.
-
-The application connects to OKX's L2 order book WebSocket, simulates $100 market buy orders, and provides live trading metrics via a backend service (FastAPI) and a responsive frontend dashboard (React + Vite).
+This is the backend implementation of the GoQuant real-time cryptocurrency trade simulator built for the GoQuant recruitment assignment. It connects to OKX L2 order book data over WebSocket, simulates a $100 market order in real time, computes trading metrics, and exposes the results via a REST API.
 
 ---
 
-## 🚀 Live Features
+## 📉 Features
 
-- Real-time WebSocket connection to OKX
-- Simulation of $100 market buy order
-- Metrics:
+- Connects to OKX WebSocket stream for BTC-USDT order book
+- Simulates a market buy order worth ~$100 USD
+- Calculates:
   - Average execution price
   - Slippage (actual vs mid price)
-  - Exchange fee
+  - Exchange fee (Tier 1 taker fee)
   - Market impact (Almgren-Chriss model)
-  - Predicted slippage (linear regression)
-  - Internal latency per tick
-- REST API for live tick
-- React frontend dashboard with cards and charts
-- Context + useReducer architecture
+  - Predicted slippage (linear regression model)
+  - Latency (ms per tick)
+- Logs each tick to CSV
+- Stores the latest tick in memory and serves it via FastAPI
 
 ---
 
-## 🔌 How to Run the Project
+## 🚀 Tech Stack
 
-### Backend Setup (FastAPI)
+- Python 3.10+
+- FastAPI
+- Websockets
+- Scikit-learn (for regression model)
+- NumPy / Pandas (for calculation)
 
-1. Navigate to backend folder:
-```bash
-./
+---
+
+## 📁 Project Structure
+
 ```
-2. Create and activate a virtual environment:
+goquant-api/
+├── main.py                 # WebSocket client, simulation logic, tick update
+├── api.py                  # FastAPI app for exposing endpoints
+├── state.py                # In-memory shared state for tick data
+├── simulation.py           # Market order simulation, fee and slippage
+├── market_impact.py        # Almgren-Chriss market impact model
+├── models.py               # Slippage prediction model (linear regression)
+├── logger.py               # CSV logger for tick events
+├── requirements.txt
+```
+
+---
+
+## 🔌 Endpoints (FastAPI)
+
+- GET /latest-tick
+  - Returns the most recent simulation result
+
+  Example:
+  ```json
+  {
+    "timestamp": "2025-05-04T10:39:13Z",
+    "order_value": 100,
+    "avg_price": 102850.50,
+    "mid_price": 102849.75,
+    "btc_executed": 0.000972,
+    "slippage": 0.00073,
+    "predicted_slippage": 0.00121,
+    "fee": 0.10,
+    "market_impact": 0.0023,
+    "latency_ms": 34.7
+  }
+  ```
+
+---
+
+## 📊 How to Run Backend Locally
+
+1. Create a virtual environment:
 ```bash
 python -m venv goquant-env
-source goquant-env/bin/activate  # or goquant-env\Scripts\activate
+source goquant-env/bin/activate  # or goquant-env\Scripts\activate on Windows
 ```
-3. Install dependencies:
+
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-4. Run the WebSocket simulator:
+
+3. Run the WebSocket simulator:
 ```bash
 python main.py
 ```
-5. Run FastAPI server in another terminal:
+
+4. In a separate terminal, run the FastAPI server:
 ```bash
 uvicorn api:app --reload --port 8000
 ```
 
-Visit: http://localhost:8000/latest-tick
+Then visit: http://localhost:8000/latest-tick
 
 ---
 
-### Frontend Setup (React)
+## 📖 Design & Models
 
-1. Navigate to frontend folder:
-```bash
-cd goquant-ui
-```
-2. Install dependencies:
-```bash
-npm install
-```
-3. Start the development server:
-```bash
-npm run dev
-```
-4. Open your browser at:
-```
-http://localhost:5173
-```
+- Fee = base_qty * price * 0.001 (0.1% OKX Tier 1 taker fee)
+- Slippage = (avg_execution_price - mid_price) / mid_price * 100
+- Predicted Slippage: Simple linear regression model trained on recent ticks
+- Market Impact: Almgren-Chriss model approximation based on order size
+- Latency: Time between tick received and fully processed (ms)
 
 ---
 
-## 🧠 Design Decisions
+## ✉️ Submission Notes
 
-- Inputs (Exchange, Order Type, Quantity) are visually rendered but not wired to simulation, per assignment scope
-- Simulation parameters (100 USD, Tier 1 fee) are fixed in backend
-- Backend stores the latest tick in memory and serves it to frontend
-- Recharts used to visualize metrics like price, slippage, etc.
-
----
-
-## 📄 Assignment Coverage
-
-- ✅ L2 Order Book WebSocket connection
-- ✅ Market order simulation (100 USD)
-- ✅ Slippage, Fee, Market Impact, Latency
-- ✅ Real-time dashboard UI (React)
-- ✅ Left panel inputs displayed (static)
-- ✅ Bonus: Live charting, trend detection
+- Backend integrates tightly with frontend via /latest-tick
+- Built in modular Python structure with clear separation of concerns
+- Designed for maintainability and real-time performance
+- Inputs such as quantity and fee tier are currently fixed but can be parameterized
 
 ---
-
